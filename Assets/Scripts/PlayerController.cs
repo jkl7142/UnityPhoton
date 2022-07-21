@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviourPunCallbacks
 {
-    GameObject player;
+    public PhotonView PV;
     private Rigidbody2D rb;
     const float speed = 10;
 
@@ -12,19 +13,13 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        if (!rb)
-        {
-            
-        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!rb)
-        {
+        if (!PV.IsMine)
             return;
-        }
 
         float hAxis = Input.GetAxis("Horizontal");
         float vAxis = Input.GetAxis("Vertical");
