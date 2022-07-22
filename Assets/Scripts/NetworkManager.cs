@@ -10,6 +10,7 @@ using UnityEngine.SceneManagement;
 
 public class NetworkManager : MonoBehaviourPunCallbacks
 {
+    string roomName = "SampleScene";
     RoomOptions roomOptions = new RoomOptions { MaxPlayers = 16 };
 
     [SerializeField]
@@ -30,6 +31,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     void Start()
     {
         OnConnect();
+        DebugText.text = "룸 접속 시도 중";
     }
 
     // Update is called once per frame
@@ -42,6 +44,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.IsConnected)
         {
+            // 마스터 서버에 접속되면 바로 룸 접속 시도
             PhotonNetwork.JoinRandomRoom();
         }
         else
@@ -52,11 +55,26 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
-        PhotonNetwork.JoinOrCreateRoom("InGame", roomOptions, null);
+        DebugText.text = "마스터 서버에 접속 됨";
+        PhotonNetwork.JoinOrCreateRoom(roomName, roomOptions, null);
+    }
+
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        DebugText.text = "마스터 서버에 접속 재시도 중";
+        PhotonNetwork.ConnectUsingSettings();
+    }
+
+    public override void OnJoinRandomFailed(short returnCode, string message)
+    {
+        DebugText.text = "새로운 룸 생성";
+        PhotonNetwork.CreateRoom(null, roomOptions);
     }
 
     public override void OnJoinedRoom()
     {
+        DebugText.text = "룸 접속 성공";
+        //PhotonNetwork.LoadLevel(roomName);
         PhotonNetwork.Instantiate("player", Vector3.zero, Quaternion.identity);
         Debug.Log("clone player");
     }
